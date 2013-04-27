@@ -30,7 +30,7 @@
   Tubes.prototype.pipe = function(ajax, options, error){
 
     if(!options.channel){
-      options.channel = 1 //set to default channel 
+      options.channel = 1; //set to default channel 
     }
 
     // stop all calls if options
