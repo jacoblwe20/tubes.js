@@ -79,22 +79,3 @@
 
 }(jQuery, this));
 
-// What I optimally would like the calls to look like
-// =====================================================
-var App = function(){
-  this.net = new Tube({
-    maxChannel : 2, 
-    max: 2,
-    onIdle : function(){
-      alert("the tubes are empty");
-    }
-  });
-  this.net.pipe({ajax}, {channel : 23, priority : 2});
-  this.net.pipe({ajax}, {channel : 23, priority : 5});
-  this.net.pipe({ajax}, {channel : 23, priority : 1, abort : true});
-  this.net.pipe({ajax}, {channel : 21});
-  this.net.pause(); // cancle calls and add them back to queue
-  this.net.pipe({ajax}, {channel : 21}); // does not start until resume
-  this.net.resume(); // resumes calls
-  this.net.clear(); // clears all calls
-};
