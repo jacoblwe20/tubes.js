@@ -1,5 +1,5 @@
 {
-  "name": "tubesjs",
+  "name": "tubes",
   "version": "0.0.1",
   "description": "network manager for xml http request",
   "scripts": {

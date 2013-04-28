@@ -12,7 +12,7 @@ module.exports = function(grunt) {
         banner: "<%=banner%>"
       },
       build: {
-        src: ['src/<%= pkg.name.toLowerCase() %>.js', 'src/units.js'],
+        src: ["src/core.js", "src/emitter.js", "src/queue.js"],
         dest: 'build/<%= pkg.name.toLowerCase() %>.min.js'
       }
     },
@@ -26,7 +26,7 @@ module.exports = function(grunt) {
         stripBanners : true
       },
       dist: {
-        src: ['src/<%= pkg.name.toLowerCase() %>.js', 'src/units.js'],
+        src: ["src/core.js", "src/emitter.js", "src/queue.js"],
         dest: 'build/<%= pkg.name.toLowerCase() %>.js'
       }
     },

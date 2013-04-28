@@ -3,7 +3,7 @@
 	var Emit = function(ajax, options){
 		// be able to attach events in options
 		if(!(this instanceof Emit)){
-			return new Emit(events.)
+			return new Emit(ajax, options);
 		}
 
 		var that = this;
@@ -17,18 +17,22 @@
 
 			switch (xhr.readyState) {
 
-				case 1 : {
+				case 1 : 
 					that.onOpen(xhr);
-				}
-				case 2 : {
+					break;
+				
+				case 2 : 
 					that.onConnection(xhr);
-				}
-				case 3 : {
+					break;
+				
+				case 3 : 
 					that.onLoading(xhr);
-				}
-				case 4 : {
+					break;
+				
+				case 4 : 
 					that.onDone(xhr);
-				}
+					break;
+				
 
 			}
 
@@ -46,7 +50,7 @@
 
 			this.event.push(callback);
 
-		};
+		}
 	};
 
 	Emit.prototype.listen = function(){

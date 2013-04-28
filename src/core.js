@@ -22,7 +22,7 @@
 
     if(!this.calls[options.channel]){
       this.calls[options.channel] = new this.Queue(options.channel);
-    };
+    }
 
     options.ajax = ajax;
     options.auto = this.state;
