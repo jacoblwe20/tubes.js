@@ -30,41 +30,37 @@
     // initiate call
   };
 
-  // need to better mange looping through queues ~ referance queues
+  Tubes.prototype.eachQueue = function(callback){
+    for(var key in this.calls){
+        var queue = this.calls[key];
+        if(queue){
+          callback(queue);
+        }
+    }
+  };
+
   Tubes.prototype.pause = function(){
     if(!this.state){
       this.state = 0;
-      for(var key in this.calls){
-        var queue = this.calls[key];
-        if(queue){
-          queue.stopCalls();
-        }
-      }
+      this.eachQueue(function(queue){
+        queue.stopCalls();
+      });
     }
   };
 
   Tubes.prototype.resume = function(){
     if(!this.state){
-      this.state = 0;
-      for(var key in this.calls){
-        var queue = this.calls[key];
-        if(queue){
-          queue.next();
-        }
-      }
+      this.state = 1;
+      this.eachQueue(function(queue){
+        queue.next();
+      });
     }
   };
 
   Tubes.prototype.clear = function(){
-    if(!this.state){
-      this.state = 0;
-      for(var key in this.calls){
-        var queue = this.calls[key];
-        if(queue){
-          queue.removeAllCalls();
-        }
-      }
-    }
+    this.eachQueue(function(queue){
+      queue.removeAllCalls();
+    });
   };
 
   exports.Tubes = Tubes;
