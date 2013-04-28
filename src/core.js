@@ -3,7 +3,7 @@
 
 // the core file should start building data structure,
 // garbage collecting and destroying and
-// handling options
+// handling 
 
 
 (function($, exports){
@@ -26,10 +26,12 @@
     // stop all calls if options
     // check for max in channel
 
-    if(this.calls[options.channel]){
-      options.ajax = ajax;
-      this.calls[options.channel].push(options);
+    if(!this.calls[options.channel]){
+      // in reality it should look more like this
+      //this.calls[options.channel] = new this.Queue(options.channel)
     }
+    options.ajax = ajax;
+    this.calls[options.channel].push(options);
     
     // initiate call
   };
