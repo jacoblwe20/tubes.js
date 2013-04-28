@@ -1,19 +1,9 @@
-// Tubes JS is a network manager,
-// it allows you to pipe in and out info
-// via jquery .ajax method but with pipe 
-// you can open and close valves.
 
-// Tubes JS can actually manage tubes for you
-// If your pipe gets too full it will queue
-// up connections.
 
-// If you want connections to have priority over
-// other connections it should.
 
-// Also you can set channels with Tube JS so if
-// the channel is now looking for a differnt set
-// of data it will.
-
+// the core file should start building data structure,
+// garbage collecting and destroying and
+// handling options
 
 
 (function($, exports){
