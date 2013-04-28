@@ -22,12 +22,19 @@
 		return this.queueId();
 	};
 
+	Queue.prototype.doneHandle = function(queue, priority, index){
+		if(typeof queue.calls[priority][index] === "object"){
+			queue.removeCall(priority, index);
+		}
+		queue.next();
+	};
+
 	Queue.prototype.eachCall = function(callback){
 		for(var start = 0; start < this.maxPriority + 1; start += 1){
 			var set = this.calls[start];
 
 			if(set){
-				for(var index = 0; index < set.length; index += 1){
+				for(var index = set.length -1; index > -1; index -= 1){
 					var call = set[index];
 
 					if(!callback(call, start, index)){
@@ -47,7 +54,17 @@
 			this.calls[options.priority] = [];
 		}
 
-		this.call[options.priority].push(options.ajax);
+		var emiter = new this.Emit(options.ajax, options);
+		var that = this;
+		var index = that.call[options.priority].length;
+
+		this.call[options.priority].push(emiter);
+		emiter.on("done", that.doneHandle(that, options.priority, index));
+		if(options.auto){
+			this.next();
+		}
+		return emiter;
+
 	};
 
 	Queue.prototype.next = function(){
@@ -55,9 +72,7 @@
 		var that = this;
 		this.eachCall(function(call, start, index){
 			if(call){
-				// need to send call to events and attach to emiter
-				// the up tick the current calls
-				// should attach index to help find on removeCall
+				call.start();
 				that.currentCalls += 1;
 				that.progress = 1; // one mean its fetching
 			}
@@ -75,8 +90,7 @@
 		this.eachCall(function(call, start, index){
 			
 			if(call && call.progress){
-				// stop ajax call
-				// do not remove
+				call.abort();
 				that.currentCalls -= 1;
 			}
 
@@ -90,15 +104,17 @@
 
 	// this could be destructive
 	Queue.prototype.removeAllCalls = function(){
-		
 		this.calls = {};
-		
 	};
 
-	Queue.prototype.removeCall = function(){
-		// somehow get location of call
-		// and then remove whole priority 
-		// set if no calls are left
+	Queue.prototype.removeCall = function(priority, index){
+
+		if(typeof this.calls[priority] === "object"){
+			this.calls[priority].splice(index, 1);
+			if(!this.calls[priority].length){
+				this.calls[priority] = null;
+			}
+		}
 	};
 
 	Tubes.prototype.Queue = Queue;

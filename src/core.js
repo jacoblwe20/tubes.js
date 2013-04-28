@@ -1,19 +1,13 @@
 
 
-
-// the core file should start building data structure,
-// garbage collecting and destroying and
-// handling 
-
-
 (function($, exports){
   
   var Tubes = function(options){
     this.calls = {};
-    this.pending = [];
     this.max = (options.max) ? options.max : 10;
     this.maxChannel = (options.maxChannel) ? 
       options.maxChannel : 2;
+    this.state = 1;
     return this;
   };
 
@@ -27,47 +21,52 @@
     // check for max in channel
 
     if(!this.calls[options.channel]){
-      // in reality it should look more like this
-      //this.calls[options.channel] = new this.Queue(options.channel)
-    }
+      this.calls[options.channel] = new this.Queue(options.channel);
+    };
+
     options.ajax = ajax;
-    this.calls[options.channel].push(options);
-    
+    options.auto = this.state;
+    this.calls[options.channel].addCall(options);
     // initiate call
   };
 
-  Tubes.prototype.fetch = function(channel, index){
-    // set tubes events up,
-    // replace callbacks
-    this.call[channel][index].JQxhr = 
-      $.ajax(this.call[channel][index].ajax);
+  // need to better mange looping through queues ~ referance queues
+  Tubes.prototype.pause = function(){
+    if(!this.state){
+      this.state = 0;
+      for(var key in this.calls){
+        var queue = this.calls[key];
+        if(queue){
+          queue.stopCalls();
+        }
+      }
+    }
   };
 
-  Tubes.prototype.events = function(channel){
-
-    var that = this;
-    this.ready = function(){
-      // check for pending
-      if(!(that.pending[channel].length)){
-        // emit idle handle set in intial options
+  Tubes.prototype.resume = function(){
+    if(!this.state){
+      this.state = 0;
+      for(var key in this.calls){
+        var queue = this.calls[key];
+        if(queue){
+          queue.next();
+        }
       }
-    };
+    }
+  };
 
-    this.done = function(){
-      // send data to callback
-    };
-
-    this.error = function(){
-      // send error to handle
-    };
-
-    this.abort = function(){
-      // emit abort event to a abort handle
-    };
-
+  Tubes.prototype.clear = function(){
+    if(!this.state){
+      this.state = 0;
+      for(var key in this.calls){
+        var queue = this.calls[key];
+        if(queue){
+          queue.removeAllCalls();
+        }
+      }
+    }
   };
 
   exports.Tubes = Tubes;
 
 }(jQuery, this));
-

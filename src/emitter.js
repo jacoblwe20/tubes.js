@@ -1,12 +1,13 @@
 (function(Tubes){
 
-	var Emit = function(xhr, id){
+	var Emit = function(ajax, options){
+		// be able to attach events in options
 		if(!(this instanceof Emit)){
 			return new Emit(events.)
 		}
 
 		var that = this;
-		this.xhr = xhr;
+		this.ajax = ajax;
 		this.open = [];
 		this.connection = [];
 		this.loading = [];
@@ -32,6 +33,9 @@
 			}
 
 		};
+
+		return this;
+
 	};
 
 	Emit.prototype = Tubes.prototype;
@@ -60,6 +64,8 @@
 			};
 		};
 
+		that.onStart = handle("start");
+
 		that.onOpen = handle("open");
 
 		that.onConnection = handle("connection");
@@ -69,6 +75,15 @@
 		that.onDone = handle("done");
 		
 	};
+
+	Emit.prototype.start = function(){
+		this.xhr = $.ajax(this.ajax);
+		this.listen();
+	};	
+
+	Emit.prototype.abort = function(){
+		that.xhr.abort();
+	};	
 
 	Tubes.prototype.Emit = Emit;
 
