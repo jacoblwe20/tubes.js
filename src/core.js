@@ -6,6 +6,9 @@ var jQuery = (jQuery) ?
 (function($, exports){
   
   var Tubes = function(options){
+    if(!(this instanceof Tubes)){
+      return new Tubes(options);
+    }
     this.calls = {};
     this.max = (options.max) ? options.max : 10;
     this.maxChannel = (options.maxChannel) ? 
