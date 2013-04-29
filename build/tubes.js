@@ -108,19 +108,21 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 	Queue.prototype = Tubes.prototype;
 
 	Queue.prototype.doneHandle = function(queue, priority, index){
-		if(typeof queue.calls[priority][index] === "object"){
-			queue.removeCall(priority, index);
-		}
-		queue.next();
+		return function(){
+			if(typeof queue.calls[priority][index] === "number"){
+				queue.removeCall(priority, index);
+			}
+			queue.next();
+		};
 	};
 
 	Queue.prototype.eachCall = function(callback){
 		for(var start = 0; start < this.maxPriority + 1; start += 1){
-			var set = this.emitters[this.calls[start]];
+			var set = this.calls[start];
 
 			if(set){
-				for(var index = set.length -1; index > -1; index -= 1){
-					var call = set[index];
+				for(var index = 0; index < set.length; index += 1){
+					var call = this.emitters[set[index]];
 
 					if(!callback(call, start, index)){
 						return null;
@@ -151,11 +153,11 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 		this.emitters[index] = emiter;
 
 		emiter.on("done", this.doneHandle(this, options.priority, index));
-		
+
 		if(options.auto){
 			this.next();
 		}
-
+		
 		return emiter;
 	};
 
@@ -163,7 +165,8 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 
 		var that = this;
 		this.eachCall(function(call, start, index){
-			if(call){
+			if(call && !call.state){
+
 				call.start();
 				that.currentCalls += 1;
 				that.progress = 1; // one mean its fetching
@@ -197,12 +200,16 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 	// this could be destructive
 	Queue.prototype.removeAllCalls = function(){
 		this.calls = {};
+		this.emitters = {};
+		this.currentCalls = 0;
 	};
 
 	Queue.prototype.removeCall = function(priority, index){
 
 		if(typeof this.calls[priority] === "object"){
 			this.calls[priority].splice(index, 1);
+			this.emitters[index] = null;
+			this.currentCalls -= 1;
 			if(!this.calls[priority].length){
 				this.calls[priority] = null;
 			}
@@ -222,36 +229,36 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 		}
 
 		var that = this;
+		var handle = function(event){
+			return function(res){
+				if(that[event]){
+					for(var index = 0; index < that[event].length; index += 1){
+						var callback = that[event][index];
+						if(typeof callback === "function"){
+							callback(xhr, res);
+						}
+					}
+				}
+				if(event === "done"){
+					that.success(res);
+				}
+			};
+		};
 		this.ajax = ajax;
 		this.open = [];
+		this.state = 0;
+		this.success = function(a){return a;}(ajax.success); //grab a copy
+		this.error = ajax.error;
 		this.connection = [];
 		this.loading = [];
 		this.done = [];
 
-		this.onChange = function(){
+		//overwrite ajax settings
+		this.ajax.success = handle("done");
 
-			switch (that.xhr.readyState) {
-
-				case 1 : 
-					that.onOpen(that.xhr);
-					break;
-				
-				case 2 : 
-					that.onConnection(that.xhr);
-					break;
-				
-				case 3 : 
-					that.onLoading(that.xhr);
-					break;
-				
-				case 4 : 
-					that.onDone(that.xhr);
-					break;
-				
-
-			}
-
-		};
+		// this really sucks
+		// this.ajax.state2 = handle('connection');
+		// this.ajax.state3 = handle("loading");
 
 		return this;
 
@@ -268,37 +275,9 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 		}
 	};
 
-	Emit.prototype.listen = function(){
-		var that = this;
-		var handle = function(event){
-			return function(){
-				if(that[event]){
-					for(var index = 0; index < that[event].length; index += 1){
-						var callback = that[event][i];
-						if(typeof callback === "function"){
-							callback(xhr);
-						}
-					}
-				}
-			};
-		};
-
-		that.onStart = handle("start");
-
-		that.onOpen = handle("open");
-
-		that.onConnection = handle("connection");
-
-		that.onLoading = handle("loading");
-
-		that.onDone = handle("done");
-		
-	};
-
 	Emit.prototype.start = function(){
+		this.state = 1;
 		this.xhr = $.ajax(this.ajax);
-		this.xhr.onreadystatechange = this.onChange;
-		this.listen();
 	};	
 
 	Emit.prototype.abort = function(){

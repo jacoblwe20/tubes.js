@@ -23,19 +23,21 @@
 	Queue.prototype = Tubes.prototype;
 
 	Queue.prototype.doneHandle = function(queue, priority, index){
-		if(typeof queue.calls[priority][index] === "object"){
-			queue.removeCall(priority, index);
-		}
-		queue.next();
+		return function(){
+			if(typeof queue.calls[priority][index] === "number"){
+				queue.removeCall(priority, index);
+			}
+			queue.next();
+		};
 	};
 
 	Queue.prototype.eachCall = function(callback){
 		for(var start = 0; start < this.maxPriority + 1; start += 1){
-			var set = this.emitters[this.calls[start]];
+			var set = this.calls[start];
 
 			if(set){
-				for(var index = set.length -1; index > -1; index -= 1){
-					var call = set[index];
+				for(var index = 0; index < set.length; index += 1){
+					var call = this.emitters[set[index]];
 
 					if(!callback(call, start, index)){
 						return null;
@@ -66,11 +68,11 @@
 		this.emitters[index] = emiter;
 
 		emiter.on("done", this.doneHandle(this, options.priority, index));
-		
+
 		if(options.auto){
 			this.next();
 		}
-
+		
 		return emiter;
 	};
 
@@ -78,7 +80,8 @@
 
 		var that = this;
 		this.eachCall(function(call, start, index){
-			if(call){
+			if(call && !call.state){
+
 				call.start();
 				that.currentCalls += 1;
 				that.progress = 1; // one mean its fetching
@@ -112,12 +115,16 @@
 	// this could be destructive
 	Queue.prototype.removeAllCalls = function(){
 		this.calls = {};
+		this.emitters = {};
+		this.currentCalls = 0;
 	};
 
 	Queue.prototype.removeCall = function(priority, index){
 
 		if(typeof this.calls[priority] === "object"){
 			this.calls[priority].splice(index, 1);
+			this.emitters[index] = null;
+			this.currentCalls -= 1;
 			if(!this.calls[priority].length){
 				this.calls[priority] = null;
 			}

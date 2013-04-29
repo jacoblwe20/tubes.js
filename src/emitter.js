@@ -7,36 +7,36 @@
 		}
 
 		var that = this;
+		var handle = function(event){
+			return function(res){
+				if(that[event]){
+					for(var index = 0; index < that[event].length; index += 1){
+						var callback = that[event][index];
+						if(typeof callback === "function"){
+							callback(xhr, res);
+						}
+					}
+				}
+				if(event === "done"){
+					that.success(res);
+				}
+			};
+		};
 		this.ajax = ajax;
 		this.open = [];
+		this.state = 0;
+		this.success = function(a){return a;}(ajax.success); //grab a copy
+		this.error = ajax.error;
 		this.connection = [];
 		this.loading = [];
 		this.done = [];
 
-		this.onChange = function(){
+		//overwrite ajax settings
+		this.ajax.success = handle("done");
 
-			switch (that.xhr.readyState) {
-
-				case 1 : 
-					that.onOpen(that.xhr);
-					break;
-				
-				case 2 : 
-					that.onConnection(that.xhr);
-					break;
-				
-				case 3 : 
-					that.onLoading(that.xhr);
-					break;
-				
-				case 4 : 
-					that.onDone(that.xhr);
-					break;
-				
-
-			}
-
-		};
+		// this really sucks
+		// this.ajax.state2 = handle('connection');
+		// this.ajax.state3 = handle("loading");
 
 		return this;
 
@@ -53,37 +53,9 @@
 		}
 	};
 
-	Emit.prototype.listen = function(){
-		var that = this;
-		var handle = function(event){
-			return function(){
-				if(that[event]){
-					for(var index = 0; index < that[event].length; index += 1){
-						var callback = that[event][i];
-						if(typeof callback === "function"){
-							callback(xhr);
-						}
-					}
-				}
-			};
-		};
-
-		that.onStart = handle("start");
-
-		that.onOpen = handle("open");
-
-		that.onConnection = handle("connection");
-
-		that.onLoading = handle("loading");
-
-		that.onDone = handle("done");
-		
-	};
-
 	Emit.prototype.start = function(){
+		this.state = 1;
 		this.xhr = $.ajax(this.ajax);
-		this.xhr.onreadystatechange = this.onChange;
-		this.listen();
 	};	
 
 	Emit.prototype.abort = function(){
