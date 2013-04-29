@@ -3,13 +3,13 @@ var jQuery = (jQuery) ?
   jQuery : (require) ?
   require('jquery') : null;
 
-(function($, exports){
+(function(exports){
   
   var Tubes = function(options){
     if(!(this instanceof Tubes)){
       return new Tubes(options);
     }
-    this.calls = {};
+    this.queues = {};
     this.max = (options.max) ? options.max : 10;
     this.maxChannel = (options.maxChannel) ? 
       options.maxChannel : 2;
@@ -17,29 +17,29 @@ var jQuery = (jQuery) ?
     return this;
   };
 
-  Tubes.prototype.pipe = function(ajax, options, error){
+  Tubes.prototype.pipe = function(ajax, options){
+
+    if(!options){
+      options = {};
+    }
 
     if(!options.channel){
       options.channel = 1; //set to default channel 
     }
 
-    // stop all calls if options
-    // check for max in channel
-
-    if(!this.calls[options.channel]){
-      this.calls[options.channel] = new this.Queue(options.channel);
+    if(!this.queues[options.channel]){
+      this.queues[options.channel] = new this.Queue(options);
     }
 
     options.ajax = ajax;
     options.auto = this.state;
-    this.calls[options.channel].addCall(options);
-    //return emitter
-    // initiate call
+
+    return this.queues[options.channel].addCall(options);
   };
 
   Tubes.prototype.eachQueue = function(callback){
-    for(var key in this.calls){
-        var queue = this.calls[key];
+    for(var key in this.queues){
+        var queue = this.queues[key];
         if(queue){
           callback(queue);
         }
@@ -47,7 +47,7 @@ var jQuery = (jQuery) ?
   };
 
   Tubes.prototype.pause = function(){
-    if(!this.state){
+    if(this.state){
       this.state = 0;
       this.eachQueue(function(queue){
         queue.stopCalls();
@@ -72,7 +72,7 @@ var jQuery = (jQuery) ?
 
   exports.Tubes = Tubes;
 
-}(jQuery, this));
+}(this));
 
 
 // also for testing ~ when export doesnt make Tubes global

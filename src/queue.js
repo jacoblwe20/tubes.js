@@ -1,26 +1,26 @@
 (function(Tubes){
 
-	var Queue = function(id, options){
+	var Queue = function(options){
+
 		if(!(this instanceof Queue)){
-			return new Queue(id, option);
+			return new Queue(options);
 		}
+
 		this.queueOptions = options;
-		this.queueId = id;
 		this.maxPriority = (options.maxPriority) ?
 			options.maxPriority :
-			3;
+			"3";
 		this.calls = {};
+		this.emitters = {};
 		this.maxCalls = (options.maxCalls) ?
 			options.maxCalls :
-			3;
+			"3";
 		this.currentCalls = 0;
+
+		return this;
 	};
 
 	Queue.prototype = Tubes.prototype;
-
-	Queue.prototype.getId = function(){
-		return this.queueId();
-	};
 
 	Queue.prototype.doneHandle = function(queue, priority, index){
 		if(typeof queue.calls[priority][index] === "object"){
@@ -31,7 +31,7 @@
 
 	Queue.prototype.eachCall = function(callback){
 		for(var start = 0; start < this.maxPriority + 1; start += 1){
-			var set = this.calls[start];
+			var set = this.emitters[this.calls[start]];
 
 			if(set){
 				for(var index = set.length -1; index > -1; index -= 1){
@@ -43,28 +43,35 @@
 				}
 			}
 		}
+		return true;
 	};
 
 	Queue.prototype.addCall = function(options){
+
 		if(!options.priority){
 			options.priority = this.maxPriority;
 		}
+	
 
-		if(!this.calls[options.priority]){
+
+		if(!(this.calls[options.priority])){
 			this.calls[options.priority] = [];
 		}
 
 		var emiter = new this.Emit(options.ajax, options);
-		var that = this;
-		var index = that.call[options.priority].length;
+		var index = this.calls[options.priority].length;
 
-		this.call[options.priority].push(emiter);
-		emiter.on("done", that.doneHandle(that, options.priority, index));
+		this.calls[options.priority].push(index);
+		this.currentCalls += 1;
+		this.emitters[index] = emiter;
+
+		emiter.on("done", this.doneHandle(this, options.priority, index));
+		
 		if(options.auto){
 			this.next();
 		}
-		return emiter;
 
+		return emiter;
 	};
 
 	Queue.prototype.next = function(){

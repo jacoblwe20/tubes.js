@@ -1,4 +1,4 @@
-(function(Tubes){
+(function(Tubes, $){
 
 	var Emit = function(ajax, options){
 		// be able to attach events in options
@@ -13,24 +13,24 @@
 		this.loading = [];
 		this.done = [];
 
-		events.onChange = function(){
+		this.onChange = function(){
 
-			switch (xhr.readyState) {
+			switch (that.xhr.readyState) {
 
 				case 1 : 
-					that.onOpen(xhr);
+					that.onOpen(that.xhr);
 					break;
 				
 				case 2 : 
-					that.onConnection(xhr);
+					that.onConnection(that.xhr);
 					break;
 				
 				case 3 : 
-					that.onLoading(xhr);
+					that.onLoading(that.xhr);
 					break;
 				
 				case 4 : 
-					that.onDone(xhr);
+					that.onDone(that.xhr);
 					break;
 				
 
@@ -82,6 +82,7 @@
 
 	Emit.prototype.start = function(){
 		this.xhr = $.ajax(this.ajax);
+		this.xhr.onreadystatechange = this.onChange;
 		this.listen();
 	};	
 
@@ -91,4 +92,4 @@
 
 	Tubes.prototype.Emit = Emit;
 
-}(Tubes));
+}(Tubes, jQuery));
