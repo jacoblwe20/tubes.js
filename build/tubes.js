@@ -263,7 +263,7 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 		if(typeof this[event] === "object" &&
 			typeof callback === "function"){
 
-			this.event.push(callback);
+			this[event].push(callback);
 
 		}
 	};

@@ -48,7 +48,7 @@
 		if(typeof this[event] === "object" &&
 			typeof callback === "function"){
 
-			this.event.push(callback);
+			this[event].push(callback);
 
 		}
 	};
