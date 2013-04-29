@@ -1,4 +1,7 @@
-
+// for testing
+var jQuery = (jQuery) ? 
+  jQuery : (require) ?
+  require('jquery') : null;
 
 (function($, exports){
   
@@ -27,6 +30,7 @@
     options.ajax = ajax;
     options.auto = this.state;
     this.calls[options.channel].addCall(options);
+    //return emitter
     // initiate call
   };
 
@@ -66,3 +70,7 @@
   exports.Tubes = Tubes;
 
 }(jQuery, this));
+
+
+// also for testing ~ when export doesnt make Tubes global
+var Tubes = (Tubes) ? Tubes : this.Tubes;
