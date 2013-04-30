@@ -101,6 +101,7 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 			options.maxCalls :
 			"3";
 		this.currentCalls = 0;
+	
 
 		return this;
 	};
@@ -138,8 +139,6 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 		if(!options.priority){
 			options.priority = this.maxPriority;
 		}
-	
-
 
 		if(!(this.calls[options.priority])){
 			this.calls[options.priority] = [];
@@ -183,9 +182,11 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 	Queue.prototype.stopCalls = function(){
 		var that = this;
 		this.eachCall(function(call, start, index){
-			
-			if(call && call.progress){
+			console.log(call);
+			if(call && call.xhr){
+				console.log("stoping");
 				call.abort();
+				call.state = 0;
 				that.currentCalls -= 1;
 			}
 
@@ -199,9 +200,10 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 
 	// this could be destructive
 	Queue.prototype.removeAllCalls = function(){
-		this.calls = {};
-		this.emitters = {};
+		this.stopCalls();
 		this.currentCalls = 0;
+		this.emitters = {};
+		this.calls = {};
 	};
 
 	Queue.prototype.removeCall = function(priority, index){
@@ -210,9 +212,6 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 			this.calls[priority].splice(index, 1);
 			this.emitters[index] = null;
 			this.currentCalls -= 1;
-			if(!this.calls[priority].length){
-				this.calls[priority] = null;
-			}
 		}
 	};
 
@@ -267,6 +266,7 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 	Emit.prototype = Tubes.prototype;
 	// because we want cool event emiters
 	Emit.prototype.on = function(event, callback){
+		console.log("on event");
 		if(typeof this[event] === "object" &&
 			typeof callback === "function"){
 
@@ -281,7 +281,7 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 	};	
 
 	Emit.prototype.abort = function(){
-		that.xhr.abort();
+		this.xhr.abort();
 	};	
 
 	Tubes.prototype.Emit = Emit;

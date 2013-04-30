@@ -16,6 +16,7 @@
 			options.maxCalls :
 			"3";
 		this.currentCalls = 0;
+	
 
 		return this;
 	};
@@ -53,8 +54,6 @@
 		if(!options.priority){
 			options.priority = this.maxPriority;
 		}
-	
-
 
 		if(!(this.calls[options.priority])){
 			this.calls[options.priority] = [];
@@ -98,9 +97,11 @@
 	Queue.prototype.stopCalls = function(){
 		var that = this;
 		this.eachCall(function(call, start, index){
-			
-			if(call && call.progress){
+			console.log(call);
+			if(call && call.xhr){
+				console.log("stoping");
 				call.abort();
+				call.state = 0;
 				that.currentCalls -= 1;
 			}
 
@@ -114,9 +115,10 @@
 
 	// this could be destructive
 	Queue.prototype.removeAllCalls = function(){
-		this.calls = {};
-		this.emitters = {};
+		this.stopCalls();
 		this.currentCalls = 0;
+		this.emitters = {};
+		this.calls = {};
 	};
 
 	Queue.prototype.removeCall = function(priority, index){
@@ -125,9 +127,6 @@
 			this.calls[priority].splice(index, 1);
 			this.emitters[index] = null;
 			this.currentCalls -= 1;
-			if(!this.calls[priority].length){
-				this.calls[priority] = null;
-			}
 		}
 	};
 

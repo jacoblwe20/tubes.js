@@ -59,7 +59,7 @@
 	};	
 
 	Emit.prototype.abort = function(){
-		that.xhr.abort();
+		this.xhr.abort();
 	};	
 
 	Tubes.prototype.Emit = Emit;
