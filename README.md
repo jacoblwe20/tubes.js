@@ -2,22 +2,31 @@
 
 because the internet is a series of tubes, and they need to be managed...
 
-#### what works so far
+#### Dependencies
+
+- jQuery
+
+so the ajax object in the code below refers to the [jQuery](http://api.jquery.com/jQuery.ajax/) ajax object, right now it is being used but will probably be migrated from once the code is in a better condition due to limitations
+
+_dont worry we will be backwards compatible_
+
+#### What works so far
 
 ```javascript
+
 this.net = new Tube({
 	maxCalls: 2
 });
 
-this.net.pipe({ajax}, {channel : 23, priority : 2});
+this.net.pipe({ajax}, {}); // pipe a request
 
-this.net.pipe({ajax}, {channel : 23, priority : 5});
+this.net.pipe({ajax}, {}); // pipe another request it queues them
 
-this.net.pipe({ajax}, {channel : 23, priority : 1, abort : true});
+this.net.pipe({ajax}, {channel : 23, priority : 1}); // we can send options as well
 
 this.net.pipe({ajax}, {channel : 21});
 
-this.net.pause(); // cancle calls and add them back to queue
+this.net.pause(); // cancel calls and add them back to queue
 
 this.net.pipe({ajax}, {channel : 21}); // does not start until resume
 
