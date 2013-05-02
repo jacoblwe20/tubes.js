@@ -24,7 +24,7 @@ this.net.pipe({ajax}, {}); // pipe another request it queues them
 
 this.net.pause(); // cancel calls and add them back to queue
 
-this.net.pipe({ajax}, {channel : 21}); // does not start until resume
+this.net.pipe({ajax}, {priority : 0}); // does not start until resume
 
 this.net.resume(); // resumes calls
 
