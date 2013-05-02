@@ -13,6 +13,8 @@ var jQuery = (jQuery) ?
     this.max = (options.max) ? options.max : 10;
     this.maxChannel = (options.maxChannel) ? 
       options.maxChannel : 2;
+    this.maxCalls = (options.maxCalls) ? 
+      options.maxCalls : 10;
     this.state = 1;
     return this;
   };
@@ -26,6 +28,8 @@ var jQuery = (jQuery) ?
     if(!options.channel){
       options.channel = 1; //set to default channel 
     }
+
+    options.maxCalls = this.maxCalls;
 
     if(!this.queues[options.channel]){
       this.queues[options.channel] = new this.Queue(options);

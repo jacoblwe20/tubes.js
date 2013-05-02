@@ -18,6 +18,8 @@ var jQuery = (jQuery) ?
     this.max = (options.max) ? options.max : 10;
     this.maxChannel = (options.maxChannel) ? 
       options.maxChannel : 2;
+    this.maxCalls = (options.maxCalls) ? 
+      options.maxCalls : 10;
     this.state = 1;
     return this;
   };
@@ -31,6 +33,8 @@ var jQuery = (jQuery) ?
     if(!options.channel){
       options.channel = 1; //set to default channel 
     }
+
+    options.maxCalls = this.maxCalls;
 
     if(!this.queues[options.channel]){
       this.queues[options.channel] = new this.Queue(options);
@@ -85,6 +89,8 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 
 (function(Tubes){
 
+	var _QueueCount = 0;
+
 	var Queue = function(options){
 
 		if(!(this instanceof Queue)){
@@ -94,15 +100,16 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 		this.queueOptions = options;
 		this.maxPriority = (options.maxPriority) ?
 			options.maxPriority :
-			"3";
+			3;
 		this.calls = {};
 		this.emitters = {};
 		this.maxCalls = (options.maxCalls) ?
 			options.maxCalls :
-			"3";
+			10;
 		this.currentCalls = 0;
 		this._lock = 0;
-	
+		_QueueCount += 1;
+		this.id = _QueueCount;
 
 		return this;
 	};
@@ -120,11 +127,14 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 	};
 
 	Queue.prototype.doneHandle = function(queue, priority, index){
+		var that = this;
 		return function(){
+			// remove call
+			if(typeof that.calls[priority][index] === "number"){
+				that.removeCall(priority, index);
+			}
+			// go to next if not locked
 			if(!queue._lock){
-				if(typeof queue.calls[priority][index] === "number"){
-					queue.removeCall(priority, index);
-				}
 				queue.next();
 			}
 		};
@@ -162,7 +172,6 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 		var index = this.calls[options.priority].length;
 
 		this.calls[options.priority].push(index);
-		this.currentCalls += 1;
 		this.emitters[index] = emiter;
 
 		emiter.on("done", this.doneHandle(this, options.priority, index));
@@ -185,9 +194,10 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 				if(call && !call.state){
 					call.start();
 					that.progress = 1; // one mean its fetching
+					that.currentCalls += 1;
 				}
 
-				if(that.currentCalls === this.maxCalls){
+				if(that.currentCalls === that.maxCalls){
 					return null;
 				}
 
@@ -222,9 +232,8 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 	};
 
 	Queue.prototype.removeCall = function(priority, index){
-
 		if(typeof this.calls[priority] === "object"){
-			this.calls[priority].splice(index, 1);
+			this.calls[priority][index] = null;
 			this.emitters[index] = null;
 			this.currentCalls -= 1;
 		}

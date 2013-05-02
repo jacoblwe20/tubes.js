@@ -10,61 +10,117 @@
 		console.log("================================");
 		console.log("");
 	};
-	banner("Tubes.js Demo")
+	banner("Tubes.js Browser Test")
 	var Tube = new Tubes({});
-	var Queue = new Tubes({});
+	var Queue = new Tubes({maxCalls:1});
 	var url = "http://gdata.youtube.com/feeds/api/videos?&orderby=published&author=GoogleDevelopers&alt=json&max-results=50&callback=?";
-	var url2 = "http://gdata.youtube.com/feeds/api/videos?&orderby=published&author=BlueXephos&alt=json&max-results=50&callback=?";
-	var ajax = {
-		url : url,
-		dataType : "json",
-		success : function(data){
-			console.log(data);
-		},
-		error : function(e){
-			console.log(e);
-		}
+	var handle = function(e){
+		console.log(e);
 	};
-	var ajax2 = {
-		url : url2,
-		dataType : "json",
-		success : function(data){
-			console.log(data);
-		},
-		error : function(e){
-			console.log(e);
-		}
+	var startPause = function(){
+		var pipe = Tube.pipe({
+			url : url,
+			dataType : "json",
+			success : handle,
+			error : handle
+		}, {});
+		var pipe2 = Tube.pipe({
+			url : url,
+			dataType : "json",
+			success : handle,
+			error : handle
+		}, {});
+		banner("Pausing Tube");
+		Tube.pause();
+
+		var last = Tube.pipe({
+			url : url,
+			dataType : "json",
+			success : handle,
+			error : handle
+		}, {});
+
+		setTimeout(function(){
+			banner("Resuming Tube");
+			Tube.resume();
+		},5000);
+
+		pipe.on("done", function(){
+			banner("Pipe1 clean");
+		});
+
+		pipe2.on("done", function(){
+			banner("Pipe2 clean");
+		});
+
+		last.on("done", function(){
+			banner("Last pipe clean");
+			banner("Starting Queue");
+			startQueue();
+		});
 	};
-	var pipe = Tube.pipe(ajax, {});
-	console.log(["pipe", pipe]);
-	var pipe2 = Tube.pipe({
-		url : url,
-		dataType : "json",
-		success : function(data){
-			console.log(data);
-		},
-		error : function(e){
-			console.log(e);
-		}
-	}, {});
-	Tube.pause();
-	var last = Tube.pipe(ajax2, {});
-	setTimeout(function(){
+	var startQueue = function(){
+		var queue1 = Queue.pipe({
+			url : url,
+			dataType : "json",
+			success : handle,
+			error : handle
+		}, {});
+		var queue2 = Queue.pipe({
+			url : url,
+			dataType : "json",
+			success : handle,
+			error : handle
+		}, {});
+		var queue3 = Queue.pipe({
+			url : url,
+			dataType : "json",
+			success : handle,
+			error : handle
+		}, {});
+		var queue4 = Queue.pipe({
+			url : url,
+			dataType : "json",
+			success : handle,
+			error : handle
+		}, {});
+		banner("Pausing Queue");
+		Tube.pause();
+		var queueLast = Queue.pipe({
+			url : url,
+			dataType : "json",
+			success : handle,
+			error : handle
+		}, {});
+
+		banner("Resuming Queue");
 		Tube.resume();
-	},5000);
-	console.log(["last", last]);
-	console.log(["pipe", pipe]);
 
-	pipe.on("done", function(){
-		banner("We're done here");
-	});
+		queue1.on("done", function(){
+			banner("Queue 1 done");
+		})
+		queue2.on("done", function(){
+			banner("Queue 2 done");
+		})
+		queue3.on("done", function(){
+			banner("Queue 3 done");
+		})
+		queue4.on("done", function(){
+			banner("Queue 4 done");
+		})
 
-	pipe2.on("done", function(){
-		banner("Pipe2 is Done");
-	});
+		queueLast.on("done", function(){
+			banner("Queue Finished");
+			banner("Test Finished");
+		})
 
-	last.on("done", function(){
-		banner("Last pipe clean");
-	});
+	};
+	var startTest = function(){
+		banner("Starting pause resume test");
+		startPause();
+	};
+
+
+	startTest();
 
 </script>

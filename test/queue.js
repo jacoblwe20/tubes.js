@@ -16,7 +16,7 @@ describe("Queue", function(){
 		assert.equal(true, tubes.Queue({}) instanceof Queue)
 	})
 	it("should set its maxCalls by default to three", function(){
-		assert.equal("3", Queue({}).maxCalls);
+		assert.equal(10, Queue({}).maxCalls);
 	})
 	it("should set its maxPriority by default to three", function(){
 		assert.equal("3", Queue({}).maxPriority);
