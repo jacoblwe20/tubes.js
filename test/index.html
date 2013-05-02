@@ -4,40 +4,40 @@
 <script src="../build/tubes.js"></script>
 <script>
 	var xhr;
-	var banner = function(str){
-		console.log("================================");
+	var banner = function(str, type){
+		var type = (type === "-") ?
+			"~" :
+			"================================"
+		console.log(type);
 		console.log(str);
-		console.log("================================");
-		console.log("");
+		console.log(type + "\n");
 	};
-	banner("Tubes.js Browser Test")
+	banner("\nTubes.js Browser Test\n")
 	var Tube = new Tubes({});
 	var Queue = new Tubes({maxCalls:1});
 	var url = "http://gdata.youtube.com/feeds/api/videos?&orderby=published&author=GoogleDevelopers&alt=json&max-results=50&callback=?";
-	var handle = function(e){
-		console.log(e);
-	};
 	var startPause = function(){
+		var count = 0;
+		var done = function(){
+			if(count === 3){
+				banner("\nStarting Queue\n");
+				startQueue();
+			}
+		};
 		var pipe = Tube.pipe({
 			url : url,
-			dataType : "json",
-			success : handle,
-			error : handle
+			dataType : "json"
 		}, {});
 		var pipe2 = Tube.pipe({
 			url : url,
-			dataType : "json",
-			success : handle,
-			error : handle
+			dataType : "json"
 		}, {});
 		banner("Pausing Tube");
 		Tube.pause();
 
 		var last = Tube.pipe({
 			url : url,
-			dataType : "json",
-			success : handle,
-			error : handle
+			dataType : "json"
 		}, {});
 
 		setTimeout(function(){
@@ -45,78 +45,76 @@
 			Tube.resume();
 		},5000);
 
-		pipe.on("done", function(){
+		pipe.on("done", function(res){
 			banner("Pipe1 clean");
+			banner(["Response", res], "-");
+			count += 1;
+			done();
 		});
 
-		pipe2.on("done", function(){
+		pipe2.on("done", function(res){
 			banner("Pipe2 clean");
+			banner(["Response", res], "-");
+			count += 1;
+			done();
 		});
 
-		last.on("done", function(){
+		last.on("done", function(res){
 			banner("Last pipe clean");
-			banner("Starting Queue");
-			startQueue();
+			banner(["Response", res], "-");
+			count += 1;
+			done();
 		});
 	};
 	var startQueue = function(){
 		var queue1 = Queue.pipe({
 			url : url,
-			dataType : "json",
-			success : handle,
-			error : handle
+			dataType : "json"
 		}, {});
 		var queue2 = Queue.pipe({
 			url : url,
-			dataType : "json",
-			success : handle,
-			error : handle
+			dataType : "json"
 		}, {});
 		var queue3 = Queue.pipe({
 			url : url,
-			dataType : "json",
-			success : handle,
-			error : handle
+			dataType : "json"
 		}, {});
 		var queue4 = Queue.pipe({
 			url : url,
-			dataType : "json",
-			success : handle,
-			error : handle
+			dataType : "json"
 		}, {});
-		banner("Pausing Queue");
-		Tube.pause();
+
 		var queueLast = Queue.pipe({
 			url : url,
-			dataType : "json",
-			success : handle,
-			error : handle
+			dataType : "json"
 		}, {});
 
-		banner("Resuming Queue");
-		Tube.resume();
-
-		queue1.on("done", function(){
+		queue1.on("done", function(res){
 			banner("Queue 1 done");
+			banner(["Response", res], "-");
 		})
-		queue2.on("done", function(){
+		queue2.on("done", function(res){
 			banner("Queue 2 done");
+			banner(["Response", res], "-");
 		})
-		queue3.on("done", function(){
+		queue3.on("done", function(res){
 			banner("Queue 3 done");
+			banner(["Response", res], "-");
 		})
-		queue4.on("done", function(){
+		queue4.on("done", function(res){
 			banner("Queue 4 done");
+			banner(["Response", res], "-");
 		})
 
-		queueLast.on("done", function(){
+		queueLast.on("done", function(res){
 			banner("Queue Finished");
+			banner(["Response", res], "-");
 			banner("Test Finished");
 		})
 
 	};
 	var startTest = function(){
-		banner("Starting pause resume test");
+		banner("\nStarting pause resume test\n");
 		startPause();
 	};
 

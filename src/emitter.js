@@ -9,7 +9,7 @@
 		var that = this;
 		// send even out, avoids some doubling up
 		var emit = function(fn, xhr, res){
-			fn(xhr, res);
+			fn(res, xhr);
 		};
 		var handle = function(event){
 			return function(res){
@@ -18,27 +18,34 @@
 						var callback = that[event][index];
 						if(typeof callback === "function"){
 							emit(callback, xhr, res);
-							//callback(xhr, res);
 						}
 					}
 				}
-				if(event === "done"){
-					that.success(res);
+				if(event === "done" && 
+					typeof that.success === "function"){
+						that.success(res);
+				}
+				if(event === "error" && 
+					res.statusText !== "abort" &&
+					typeof that.error_ === "function"){
+						that.error_(res);
 				}
 			};
 		};
+
 		this.ajax = ajax;
 		this.open = [];
 		this.state = 0;
 		this.success = function(a){return a;}(ajax.success); //grab a copy
-		this.error = ajax.error;
+		this.error_ = function(a){return a;}(ajax.error);
 		this.connection = [];
 		this.loading = [];
 		this.done = [];
+		this.error = [];
 
 		//overwrite ajax settings
 		this.ajax.success = handle("done");
-
+		this.ajax.error = handle("error");
 		// this really sucks
 		// this.ajax.state2 = handle('connection');
 		// this.ajax.state3 = handle("loading");
@@ -56,6 +63,7 @@
 			this[event].push(callback);
 
 		}
+		return this;
 	};
 
 	Emit.prototype.start = function(){
