@@ -12,32 +12,59 @@
 	};
 	banner("Tubes.js Demo")
 	var Tube = new Tubes({});
-	var Queue = new Tubes({maxCalls:1});
-	var url = "http://gdata.youtube.com/feeds/api/videos?&orderby=published&author=GoogleDevelopers&alt=json&max-results=8&callback=?";
-	var url2 = "http://gdata.youtube.com/feeds/api/videos?&orderby=published&author=BlueXephos&alt=json&max-results=8&callback=?";
+	var Queue = new Tubes({});
+	var url = "http://gdata.youtube.com/feeds/api/videos?&orderby=published&author=GoogleDevelopers&alt=json&max-results=50&callback=?";
+	var url2 = "http://gdata.youtube.com/feeds/api/videos?&orderby=published&author=BlueXephos&alt=json&max-results=50&callback=?";
 	var ajax = {
 		url : url,
 		dataType : "json",
 		success : function(data){
 			console.log(data);
+		},
+		error : function(e){
+			console.log(e);
+		}
+	};
+	var ajax2 = {
+		url : url2,
+		dataType : "json",
+		success : function(data){
+			console.log(data);
+		},
+		error : function(e){
+			console.log(e);
 		}
 	};
 	var pipe = Tube.pipe(ajax, {});
-	ajax.url = url2;
-	var pipe2 = Tube.pipe(ajax, {});
+	console.log(["pipe", pipe]);
+	var pipe2 = Tube.pipe({
+		url : url,
+		dataType : "json",
+		success : function(data){
+			console.log(data);
+		},
+		error : function(e){
+			console.log(e);
+		}
+	}, {});
 	Tube.pause();
-	ajax.url = url;
-	var last = Tube.pipe(ajax, {});
+	var last = Tube.pipe(ajax2, {});
 	setTimeout(function(){
 		Tube.resume();
-	},2000)
+	},5000);
+	console.log(["last", last]);
+	console.log(["pipe", pipe]);
 
 	pipe.on("done", function(){
 		banner("We're done here");
 	});
 
+	pipe2.on("done", function(){
+		banner("Pipe2 is Done");
+	});
+
 	last.on("done", function(){
-		banner("Finished up pause resume demo");
-	})
+		banner("Last pipe clean");
+	});
 
 </script>

@@ -50,7 +50,7 @@ var jQuery = (jQuery) ?
     if(this.state){
       this.state = 0;
       this.eachQueue(function(queue){
-        queue.stopCalls();
+        queue.lock().stopCalls();
       });
     }
   };
@@ -59,7 +59,7 @@ var jQuery = (jQuery) ?
     if(!this.state){
       this.state = 1;
       this.eachQueue(function(queue){
-        queue.next();
+        queue.unlock().next();
       });
     }
   };

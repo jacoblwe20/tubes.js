@@ -1,5 +1,5 @@
 /*
- * tubes.js - 0.0.1 
+ * tubes.js - 0.0.5 
  * Author : Jacob Lowe <http://jacoblowe.me> 
  */
 
@@ -55,7 +55,7 @@ var jQuery = (jQuery) ?
     if(this.state){
       this.state = 0;
       this.eachQueue(function(queue){
-        queue.stopCalls();
+        queue.lock().stopCalls();
       });
     }
   };
@@ -64,7 +64,7 @@ var jQuery = (jQuery) ?
     if(!this.state){
       this.state = 1;
       this.eachQueue(function(queue){
-        queue.next();
+        queue.unlock().next();
       });
     }
   };
@@ -101,6 +101,7 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 			options.maxCalls :
 			"3";
 		this.currentCalls = 0;
+		this._lock = 0;
 	
 
 		return this;
@@ -108,12 +109,24 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 
 	Queue.prototype = Tubes.prototype;
 
+	Queue.prototype.lock = function(){
+		this._lock = 1;
+		return this;
+	};
+
+	Queue.prototype.unlock = function(){
+		this._lock = 0;
+		return this;
+	};
+
 	Queue.prototype.doneHandle = function(queue, priority, index){
 		return function(){
-			if(typeof queue.calls[priority][index] === "number"){
-				queue.removeCall(priority, index);
+			if(!queue._lock){
+				if(typeof queue.calls[priority][index] === "number"){
+					queue.removeCall(priority, index);
+				}
+				queue.next();
 			}
-			queue.next();
 		};
 	};
 
@@ -131,6 +144,7 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 				}
 			}
 		}
+
 		return true;
 	};
 
@@ -153,38 +167,39 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 
 		emiter.on("done", this.doneHandle(this, options.priority, index));
 
-		if(options.auto){
+		if(!this._lock){
 			this.next();
 		}
 		
-		return emiter;
+		return function(e){
+			return e;
+		}(emiter);
+
 	};
 
 	Queue.prototype.next = function(){
 
-		var that = this;
-		this.eachCall(function(call, start, index){
-			if(call && !call.state){
+		if(!this._lock){
+			var that = this;
+			this.eachCall(function(call, start, index){
+				if(call && !call.state){
+					call.start();
+					that.progress = 1; // one mean its fetching
+				}
 
-				call.start();
-				that.currentCalls += 1;
-				that.progress = 1; // one mean its fetching
-			}
+				if(that.currentCalls === this.maxCalls){
+					return null;
+				}
 
-			if(that.currentCalls === this.maxCalls){
-				return null;
-			}
-
-			return true;
-		});
+				return true;
+			});
+		}
 	};
 
 	Queue.prototype.stopCalls = function(){
 		var that = this;
 		this.eachCall(function(call, start, index){
-			console.log(call);
 			if(call && call.xhr){
-				console.log("stoping");
 				call.abort();
 				call.state = 0;
 				that.currentCalls -= 1;
@@ -228,13 +243,18 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 		}
 
 		var that = this;
+		// send even out, avoids some doubling up
+		var emit = function(fn, xhr, res){
+			fn(xhr, res);
+		};
 		var handle = function(event){
 			return function(res){
 				if(that[event]){
 					for(var index = 0; index < that[event].length; index += 1){
 						var callback = that[event][index];
 						if(typeof callback === "function"){
-							callback(xhr, res);
+							emit(callback, xhr, res);
+							//callback(xhr, res);
 						}
 					}
 				}
@@ -266,7 +286,6 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 	Emit.prototype = Tubes.prototype;
 	// because we want cool event emiters
 	Emit.prototype.on = function(event, callback){
-		console.log("on event");
 		if(typeof this[event] === "object" &&
 			typeof callback === "function"){
 

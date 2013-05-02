@@ -7,13 +7,18 @@
 		}
 
 		var that = this;
+		// send even out, avoids some doubling up
+		var emit = function(fn, xhr, res){
+			fn(xhr, res);
+		};
 		var handle = function(event){
 			return function(res){
 				if(that[event]){
 					for(var index = 0; index < that[event].length; index += 1){
 						var callback = that[event][index];
 						if(typeof callback === "function"){
-							callback(xhr, res);
+							emit(callback, xhr, res);
+							//callback(xhr, res);
 						}
 					}
 				}

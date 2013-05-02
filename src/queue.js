@@ -16,6 +16,7 @@
 			options.maxCalls :
 			"3";
 		this.currentCalls = 0;
+		this._lock = 0;
 	
 
 		return this;
@@ -23,12 +24,24 @@
 
 	Queue.prototype = Tubes.prototype;
 
+	Queue.prototype.lock = function(){
+		this._lock = 1;
+		return this;
+	};
+
+	Queue.prototype.unlock = function(){
+		this._lock = 0;
+		return this;
+	};
+
 	Queue.prototype.doneHandle = function(queue, priority, index){
 		return function(){
-			if(typeof queue.calls[priority][index] === "number"){
-				queue.removeCall(priority, index);
+			if(!queue._lock){
+				if(typeof queue.calls[priority][index] === "number"){
+					queue.removeCall(priority, index);
+				}
+				queue.next();
 			}
-			queue.next();
 		};
 	};
 
@@ -46,6 +59,7 @@
 				}
 			}
 		}
+
 		return true;
 	};
 
@@ -68,38 +82,39 @@
 
 		emiter.on("done", this.doneHandle(this, options.priority, index));
 
-		if(options.auto){
+		if(!this._lock){
 			this.next();
 		}
 		
-		return emiter;
+		return function(e){
+			return e;
+		}(emiter);
+
 	};
 
 	Queue.prototype.next = function(){
 
-		var that = this;
-		this.eachCall(function(call, start, index){
-			if(call && !call.state){
+		if(!this._lock){
+			var that = this;
+			this.eachCall(function(call, start, index){
+				if(call && !call.state){
+					call.start();
+					that.progress = 1; // one mean its fetching
+				}
 
-				call.start();
-				that.currentCalls += 1;
-				that.progress = 1; // one mean its fetching
-			}
+				if(that.currentCalls === this.maxCalls){
+					return null;
+				}
 
-			if(that.currentCalls === this.maxCalls){
-				return null;
-			}
-
-			return true;
-		});
+				return true;
+			});
+		}
 	};
 
 	Queue.prototype.stopCalls = function(){
 		var that = this;
 		this.eachCall(function(call, start, index){
-			console.log(call);
 			if(call && call.xhr){
-				console.log("stoping");
 				call.abort();
 				call.state = 0;
 				that.currentCalls -= 1;
