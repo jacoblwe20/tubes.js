@@ -1,5 +1,5 @@
 /*
- * tubes.js - 0.0.5 
+ * tubes.js - 0.0.13 
  * Author : Jacob Lowe <http://jacoblowe.me> 
  */
 
@@ -110,6 +110,7 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 		this._lock = 0;
 		_QueueCount += 1;
 		this.id = _QueueCount;
+		this._emitterId = 0;
 
 		return this;
 	};
@@ -160,7 +161,12 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 
 	Queue.prototype.addCall = function(options){
 
-		if(!options.priority){
+		if(!options){
+			options = {};
+		}
+
+		// make sure 0 doesnt get caught here
+		if(typeof options.priority === "undefined"){
 			options.priority = this.maxPriority;
 		}
 
@@ -170,9 +176,10 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 
 		var emiter = new this.Emit(options.ajax, options);
 		var index = this.calls[options.priority].length;
+		var id = this._emitterId += 1;
 
-		this.calls[options.priority].push(index);
-		this.emitters[index] = emiter;
+		this.calls[options.priority].push(id);
+		this.emitters[id] = emiter;
 
 		emiter.on("done", this.doneHandle(this, options.priority, index));
 
