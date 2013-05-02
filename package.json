@@ -1,6 +1,6 @@
 {
   "name": "tubes",
-  "version": "0.0.5",
+  "version": "0.0.13",
   "description": "network manager for xml http request",
   "scripts": {
     "test": "grunt test"

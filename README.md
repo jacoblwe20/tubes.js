@@ -18,13 +18,9 @@ this.net = new Tube({
 	maxCalls: 2
 });
 
-this.net.pipe({ajax}, {}); // pipe a request
+var call = this.net.pipe({ajax}, {}); // pipe a request
 
 this.net.pipe({ajax}, {}); // pipe another request it queues them
-
-this.net.pipe({ajax}, {channel : 23, priority : 1}); // we can send options as well
-
-this.net.pipe({ajax}, {channel : 21});
 
 this.net.pause(); // cancel calls and add them back to queue
 
@@ -33,6 +29,10 @@ this.net.pipe({ajax}, {channel : 21}); // does not start until resume
 this.net.resume(); // resumes calls
 
 this.net.clear(); // clears all calls
+
+call.on("done", function(res){
+	// do stuff
+});
 
 ```
 
