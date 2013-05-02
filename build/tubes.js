@@ -1,5 +1,5 @@
 /*
- * tubes.js - 0.0.13 
+ * tubes.js - 0.1.0 
  * Author : Jacob Lowe <http://jacoblowe.me> 
  */
 
@@ -20,6 +20,7 @@ var jQuery = (jQuery) ?
       options.maxChannel : 2;
     this.maxCalls = (options.maxCalls) ? 
       options.maxCalls : 10;
+    this.onIdle = options.onIdle;
     this.state = 1;
     return this;
   };
@@ -34,6 +35,7 @@ var jQuery = (jQuery) ?
       options.channel = 1; //set to default channel 
     }
 
+    options.onIdle = this.onIdle;
     options.maxCalls = this.maxCalls;
 
     if(!this.queues[options.channel]){
@@ -106,6 +108,7 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 		this.maxCalls = (options.maxCalls) ?
 			options.maxCalls :
 			10;
+		this.onIdle = options.onIdle;
 		this.currentCalls = 0;
 		this._lock = 0;
 		_QueueCount += 1;
@@ -154,6 +157,11 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 					}
 				}
 			}
+		}
+		if(typeof this.onIdle === "function" &&
+			this.currentCalls === 0){
+
+			this.onIdle();
 		}
 
 		return true;
@@ -223,7 +231,11 @@ var Tubes = (Tubes) ? Tubes : this.Tubes;
 			}
 
 			if(that.currentCalls === 0){
+				if(typeof that.onIdle === "function"){
+					that.onIdle();
+				}
 				return null;
+
 			}
 			
 			return true;

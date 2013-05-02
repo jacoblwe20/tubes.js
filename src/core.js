@@ -15,6 +15,7 @@ var jQuery = (jQuery) ?
       options.maxChannel : 2;
     this.maxCalls = (options.maxCalls) ? 
       options.maxCalls : 10;
+    this.onIdle = options.onIdle;
     this.state = 1;
     return this;
   };
@@ -29,6 +30,7 @@ var jQuery = (jQuery) ?
       options.channel = 1; //set to default channel 
     }
 
+    options.onIdle = this.onIdle;
     options.maxCalls = this.maxCalls;
 
     if(!this.queues[options.channel]){

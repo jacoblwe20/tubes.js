@@ -17,6 +17,7 @@
 		this.maxCalls = (options.maxCalls) ?
 			options.maxCalls :
 			10;
+		this.onIdle = options.onIdle;
 		this.currentCalls = 0;
 		this._lock = 0;
 		_QueueCount += 1;
@@ -65,6 +66,11 @@
 					}
 				}
 			}
+		}
+		if(typeof this.onIdle === "function" &&
+			this.currentCalls === 0){
+
+			this.onIdle();
 		}
 
 		return true;
@@ -134,7 +140,11 @@
 			}
 
 			if(that.currentCalls === 0){
+				if(typeof that.onIdle === "function"){
+					that.onIdle();
+				}
 				return null;
+
 			}
 			
 			return true;

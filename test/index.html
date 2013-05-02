@@ -13,8 +13,13 @@
 		console.log(type + "\n");
 	};
 	banner("\nTubes.js Browser Test\n")
-	var Tube = new Tubes({});
-	var Queue = new Tubes({maxCalls:1});
+	var idle = function(name){
+		return function(){
+			banner(name + " is idle", "-");
+		}
+	}
+	var Tube = new Tubes({onIdle:idle("Tube")});
+	var Queue = new Tubes({maxCalls:1, onIdle:idle("Queue")});
 	var url = "http://gdata.youtube.com/feeds/api/videos?&orderby=published&author=GoogleDevelopers&alt=json&max-results=50&callback=?";
 	var startPause = function(){
 		var count = 0;
