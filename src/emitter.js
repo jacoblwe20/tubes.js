@@ -84,6 +84,11 @@
 	// this method return the instance so mutltiple on method my be chained together
 
 	Emit.prototype.on = function(event, callback){
+
+		if(event === "success"){
+			event = "done"; // pretty muuch just mapping success to done
+		}
+
 		if(typeof this[event] === "object" &&
 			typeof callback === "function"){
 
