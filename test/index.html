@@ -66,6 +66,47 @@
 			done();
 		});
 	};
+	var startPriority = function(){
+		//reuse Queue
+		banner("Starting Priority Test");
+		banner("Pausing Tube and adding calls", "-");
+		Queue.pause();
+		var pri1 = Queue.pipe({
+			url : url,
+			dataType : "json"
+		}, {priority : 3});
+		var pri2 = Queue.pipe({
+			url : url,
+			dataType : "json"
+		}, {priority : 2});
+		var pri3 = Queue.pipe({
+			url : url,
+			dataType : "json"
+		}, {priority : 0});
+		var pri4 = Queue.pipe({
+			url : url,
+			dataType : "json"
+		}, {priority : 1});
+		Queue.resume();
+
+		pri1.on("done", function(){
+			banner("Call 1 Priority 3 Done");
+			banner("Test Finished");
+		});
+
+		pri2.on("done", function(){
+			banner("Call 2 Priority 2 Done");
+		});
+
+		pri3.on("done", function(){
+			banner("Call 3 Priority 0 Done");
+		});
+
+		pri4.on("done", function(){
+			banner("Call 4 Priority 1 Done");
+		});
+
+	};
 	var startQueue = function(){
 		var queue1 = Queue.pipe({
 			url : url,
@@ -109,7 +150,7 @@
 		queueLast.on("done", function(res){
 			banner("Queue Finished");
 			banner(["Response", res], "-");
-			banner("Test Finished");
+			startPriority();
 		})
 
 	};

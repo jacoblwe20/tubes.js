@@ -1,6 +1,6 @@
 {
   "name": "tubes",
-  "version": "0.0.13",
+  "version": "0.1.0",
   "description": "network manager for xml http request",
   "scripts": {
     "test": "grunt test"
@@ -17,7 +17,7 @@
     "pipes"
   ],
   "author": "Jacob Lowe <http://jacoblowe.me>",
-  "license": "BSD",
+  "license": "MIT",
   "readmeFilename": "README.md",
   "devDependencies": {
     "grunt": "~0.4.1",
