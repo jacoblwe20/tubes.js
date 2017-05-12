@@ -1,5 +1,7 @@
 # Tube.js
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/jcblw/tubes.js.svg)](https://greenkeeper.io/)
+
 because the internet is a series of tubes, and they need to be managed...
 
 #### Dependencies
